@@ -1,0 +1,98 @@
+<ROSETTASCRIPTS>
+ 
+  <TASKOPERATIONS>
+         <LimitAromaChi2 name="arochi"/>
+         <ExtraRotamersGeneric name="ex1_ex2" ex1="1" ex2="1"/>
+         <ReadResfile name="resfile" filename="resfile_v2.txt"/>
+         <IncludeCurrent name="input_sc" />
+
+   </TASKOPERATIONS>
+
+  <RESIDUE_SELECTORS>
+     <Chain name="chAB" chains="A,B"/>
+     <Chain name="chA" chains="A"/>
+     <Chain name="chB" chains="B"/>
+  </RESIDUE_SELECTORS>
+
+
+ 	<SCOREFXNS>
+    
+    <ScoreFunction name="f19_mem_cart_cs" weights="franklin2019">
+      <Reweight scoretype="coordinate_constraint" weight="1" />
+      <Reweight scoretype="cart_bonded" weight="0.5" />
+      <Reweight scoretype="pro_close" weight="0.0" />
+    </ScoreFunction>
+
+    <ScoreFunction name="f19_mem_cs" weights="franklin2019">
+         <Reweight scoretype="coordinate_constraint" weight="1" />
+    </ScoreFunction>
+
+    <ScoreFunction name="f19_mem_mod" weights="franklin2019">
+         <Reweight scoretype="coordinate_constraint" weight="1" />
+         <Reweight scoretype="rg" weight="1"/>
+    </ScoreFunction>
+
+ 	</SCOREFXNS>
+ 
+
+ <FILTERS>
+
+  <ScoreType name="score_eval" scorefxn="f19_mem_cs" threshold="5000"/>
+  <PackStat name="packstat" threshold="0.4" confidence="0" repeats="10" />
+  <ShapeComplementarity name="sc_jump1" jump="1" write_int_area="1" />
+  <ShapeComplementarity name="sc_AB" write_int_area="1" residue_selector1="chA" residue_selector2="chB"/>
+  <CavityVolume name="cav_vol" />
+  <InterfaceHoles name="intf_holes_jump1" jump="1" threshold="200"/>
+
+ </FILTERS>
+
+
+
+	<MOVERS>
+
+  <ConstraintSetMover name="add_cst" cst_file="%%cst_file%%"/>
+ 	<AddMembraneMover name="add_memb"/>
+ 	<MembranePositionFromTopologyMover name="init_pos"/>
+ 	<SetMembranePositionMover name="init_posMEM"/>
+
+ 	<AddCompositionConstraintMover name="AAcomp" filename="TMab_AA_comp_less2-MWY.comp" selector="chB" />
+
+ 	<FastRelax name="fast_design_relax"  disable_design="0" scorefxn="f19_mem_cs" relaxscript="InterfaceDesign2019" repeats="4" task_operations="arochi,ex1_ex2,input_sc,resfile" cst_file="%%cst_file%%"/>
+
+ 	<FastDesign name="fast_design4"  disable_design="0" scorefxn="f19_mem_cs" relaxscript="InterfaceDesign2019" repeats="4" task_operations="arochi,ex1_ex2,input_sc,resfile" cst_file="%%cst_file%%"/>
+  <FastDesign name="fast_design8"  disable_design="0" scorefxn="f19_mem_mod" relaxscript="InterfaceDesign2019" repeats="8" task_operations="arochi,ex1_ex2,input_sc,resfile" cst_file="%%cst_file%%"/>
+
+ 	<InterfaceAnalyzerMover name="interface-data" scorefxn="f19_mem_cs" packstat="1" interface_sc="1" interface="A_B" pack_separated="1"/>
+
+  <MinMover name="minimize_struc" scorefxn="f19_mem_cart_cs" chi="1" bb="1" jump="ALL" cartesian="1" type="dfpmin_armijo_nonmonotone" tolerance="0.01"/>
+
+
+
+	</MOVERS>
+ 
+	<PROTOCOLS>
+
+	<Add mover="add_memb"/>
+	<Add mover="init_posMEM"/>
+	<Add mover="AAcomp"/>
+	<Add mover="fast_design4"/>
+  <Add mover="minimize_struc"/>
+  <Add mover="fast_design8"/>
+
+
+
+  <Add mover="interface-data"/>
+
+
+  <Add filter="cav_vol"/>
+  <Add filter="sc_AB"/> 
+  <Add filter="sc_jump1"/> 
+  <Add filter="packstat"/> 
+
+    
+
+	</PROTOCOLS>
+
+	<OUTPUT scorefxn="f19_mem_cs"/>
+
+</ROSETTASCRIPTS>
