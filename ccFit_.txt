@@ -1,0 +1,32 @@
+Structure Summary
+
+selection = "all"
+chains	2 (fit 21 residues in each)
+chain A	29.043 Å in Z-direction
+chain B	29.039 Å in Z-direction; anti-parallel to chain A
+
+
+Best-fit Crick parameters[1]:
+
+R0 (Å) 	4.322
+R1 (Å) 	2.298
+ω0 (°/res) 	-3.339
+ω1 (°/res) 	102.371
+α (°) 	-9.632
+φ1 for chain A (°) 	63.787
+φ1 for chain B (°) 	53.451
+Δφ0 for chain B (°) 	180.000
+starting heptad position for chain A 	c
+starting heptad position for chain B 	c
+pitch (Å) 	160.004
+rise per residue (Å) 	1.505
+ΔZoff for chain B (Å) 	2.332
+ΔZaa' for chain B (Å) 	1.865
+absolute Zoff for chain B (Å) 	-2.969
+RMSD 	0.446 Å
+processed selection 	954acc20e833.pdb
+fit CA trace 	954acc20e833.CA.pdb
+fit CA-CA distance 	3.80
+	
+
+Coiled-coil parameters. A) Visual representation of the major coiled-coil parameters. B) Distribution of helical phases (parameter φ1) in native parallel and anti-parallel coiled coils reveals the mapping between phase angles and heptad positions (bold letters).

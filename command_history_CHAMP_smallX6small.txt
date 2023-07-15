@@ -1,0 +1,89 @@
+##### STEP 0: generate a TM domain threaded with TM domain of interest ####
+
+Option 0a, generate RosettaMP TM orientation span file from octopus server
+Then, let rosettaMP FastRelax thread + orient the TM domain based on predicted span
+
+Option 0b, use Scrwl4 to thread sequence onto given ideal helix file “40_allAlaIdealHelix.pdb”
+Fast Relax still allows optimization of TM orientation
+
+Option 0c, after one of these two options, run MembraneEnergyLandscapeSampler 
+(not explored here, but analogous to OPM PPM)
+
+
+### Commands below for option 0b
+
+# Thread sequence onto an ideal poly-ale helix
+Input file 1: ideal helix pdb exactly length of input sequence (script or edit manually, pymol from input 40aa)
+Input file 2: single line .txt file with TM domain primary seq in single letter code
+
+> Scwrl4 -i 27aa_polyAla_Centered_Zaligned.pdb -s mEpoR_TM.txt -o mEpoR_TM_threaded.pdb
+
+# Relax the target TM domain in bilayer
+# using Franklin19 score function, select lipid type to map mammalian cell environment or ideal thickness
+# Note: rosetta TM spans are not to be trusted, inspect manually & edit span file accordingly. 
+# can run spanfile_from_pdb.executable or generate template with options '-mp::setup::spans_from_structure', '1'
+# or manually modify the input span file in this tutorial.  
+# Note this python script renumbers the input PDB from 1, match span to that
+
+> python ./bin/1_orient_and_relax_targetTM_RosettaMP.py mEpoR_TM_threaded.pdb ~/rosetta/ ./bin/1_targetTM_Relax.xml out.span
+
+# give oriented TM domain
+
+> python ./bin/2_templateSearch_bySeq_AntiPar.py ~/tmPDB_mar2020/40%_nonRedundant_finalPdbs.txt mEpoR_TM_threaded_0001.pdb [ASGC]\w\w\w\w\w\w[ASGC]\w\w\w\w\w\w[ASGC] smallX6small_x3_matches
+
+> python ./bin/2_templateSearch_bySeq_AntiPar.py ~/2023june_tmPDB/40%%master-nr-TMdatabase_bychain/  mEpoR_TM_threaded_0001.pdb "[ASGC]\w\w\w\w\w\w[ASGC]\w\w\w\w\w\w[ASGC]" ~/2023june_tmPDB/selectedfasta/ ~/2023june_tmPDB/40%%IDfull_nr-TMpdbs/  smallX6small_x3_matches
+
+
+> python3 bin/3_cluster_fishedBinders.py test_cluster_/ a
+
+#  Run CCCP structure fitter octave code on clustered helix-helix geometries
+#  gather statistics of coiled-coil parameters of interface
+#  run CCCP structure generator octave code or manually on server of idealized coiled-coil to generate representative geometry
+
+# Manually align the closest amino acid interface on the chain A helix in ideal coiled-coil with ‘target’.  
+# Note the amino acid register shift between target single TM helix vs the chain A on the 2-helix interface template e.g. 5 residue offset
+# that’s use as input for next script building the dimer backbone
+# constraints and rosetta 'resfile' text files auto-written as well to defining designable residues
+
+> python3 ./bin/4_prepTM_4_rosettaMP.py mEpoR_TM_threaded_0001.pdb 34aa_ideal_serZip_alaBackbone_3c8482b779a4.allbb.pdb 5
+
+# Any manual modifications to the resfile based in separate bioinformatics analysis 
+# to restrict residue choices at key interface positions can work as well. 
+
+
+# new modern energy function for rosettaMP “franklin_19” - not as good
+> python3 ./bin/5_runRosettaMP_Design.py design_input_interface.pdb ~/rosetta/ ./bin/5_design_TM_protocol2.xml resfile_v2.txt constraint.txt run2_outputs/
+
+# original energy function “high-res 2012” - much better diversity at interface
+> python3 ./bin/5_runRosettaMP_Design.py design_input_interface.pdb ~/rosetta/ ./bin/5_design_TM_protocol2.xml resfile_v2.txt constraint.txt run2_outputs/
+
+
+
+# Run ~1000 design trajectories. Parse design models, get sequences & scores
+# print info to fasta file & move ‘good’ designs to new dir
+# filters are not too many unsatisfied buried polars, 
+# surface complementarity >0.65
+# top 50% of Rosetta interface score
+# top 10% of packstat (RosettaHoles1)
+
+> mkdir top_designs
+
+> python3 ./bin/6_parse_analyzeDesigns.py run2_outputs B top_designs/
+
+
+### Cluster sequences of ’good designs’ passing filter by relevant blosom matrix
+# print out the suggested designs - test one from each cluster; more or less if you want
+# Running MD simulation in POPC bilayer might help filter designs by RMSD stability
+# Consider manually mutating/trimming polar termini residues for final expression construct
+
+> python3 ./bin/7_clusterDesigns.py top_designs/good_designs.fasta top_designs/distanceMatrix.pkl
+
+# or
+
+> python3 ./bin/7_clusterDesigns.py top_designs/good_designs.fasta top_designs/distanceMatrix.pkl > ranked_designs.txt
+
+
+
+
+
+

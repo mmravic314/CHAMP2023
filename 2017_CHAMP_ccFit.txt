@@ -1,0 +1,16 @@
+
+R0 (Å) 	4.081
+R1 (Å) 	2.227
+ω0 (°/res) 	-2.896
+ω1 (°/res) 	102.366
+α (°) 	-7.628
+φ1 for chain X (°) 	132.911
+φ1 for chain A (°) 	-16.912
+Δφ0 for chain A (°) 	180.000
+starting heptad position for chain X 	d
+starting heptad position for chain A 	f
+pitch (Å) 	191.444
+rise per residue (Å) 	1.554
+ΔZoff for chain A (Å) 	2.116
+ΔZaa' for chain A (Å) 	2.117
+absolute Zoff for chain A (Å) 	-1.460
